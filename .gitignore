@@ -1,0 +1,5 @@
+# Ignorar entornos virtuales
+venv/
+__pycache__/
+*.pyc
+*.db
