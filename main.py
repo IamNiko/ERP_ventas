@@ -6,7 +6,7 @@ import sqlite3
 from usuarios import GestionUsuarios
 from gestion_articulos import GestionArticulos
 from nueva_factura import NuevaFactura
-from facturacion import BuscadorVentas, cargar_ventas_desde_csv
+from facturacion import BuscadorVentas
 
 # Configuración inicial de CustomTkinter
 ctk.set_default_color_theme("dark-blue")  # Opcional, pero mejora la visibilidad

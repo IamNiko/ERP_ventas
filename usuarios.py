@@ -38,7 +38,7 @@ class GestionUsuarios(ctk.CTkFrame):
             ctk.CTkLabel(self.scrollable_frame, text=header, font=("Arial", 12, "bold")).grid(row=0, column=col, padx=5, pady=5)
 
         # Datos de la tabla
-        self.cursor.execute("SELECT id, nombre_usuario, rol, activo FROM usuarios")
+        self.cursor.execute("SELECT id, usuario, rol, activo FROM usuarios")
         usuarios = self.cursor.fetchall()
 
         for row, usuario in enumerate(usuarios, start=1):
@@ -129,7 +129,7 @@ class AgregarUsuario(ctk.CTkToplevel):
         cursor = conn.cursor()
 
         try:
-            cursor.execute("INSERT INTO usuarios (nombre_usuario, contrasena, rol, activo) VALUES (?, ?, ?, 1)",
+            cursor.execute("INSERT INTO usuarios (usuario, contrasena, rol, activo) VALUES (?, ?, ?, 1)",
                            (nombre, contrasena, rol))
             conn.commit()
             messagebox.showinfo("Éxito", f"Usuario '{nombre}' agregado con éxito.")
@@ -147,11 +147,6 @@ class EditarUsuario(ctk.CTkToplevel):
         self.geometry("400x400")
         self.usuario_id = usuario_id
 
-        # Asegurar que la ventana esté al frente
-        self.lift()
-        self.grab_set()
-        self.focus_set()
-
         # Marco desplazable
         self.scrollable_frame = ctk.CTkScrollableFrame(self, width=380, height=380)
         self.scrollable_frame.pack(fill="both", expand=True, padx=10, pady=10)
@@ -159,7 +154,7 @@ class EditarUsuario(ctk.CTkToplevel):
         # Cargar datos del usuario
         conn = sqlite3.connect("erp_ventas.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT nombre_usuario, contrasena, rol, activo FROM usuarios WHERE id = ?", (usuario_id,))
+        cursor.execute("SELECT usuario, contrasena, rol, activo FROM usuarios WHERE id = ?", (usuario_id,))
         usuario = cursor.fetchone()
         conn.close()
 
@@ -203,11 +198,10 @@ class EditarUsuario(ctk.CTkToplevel):
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE usuarios
-            SET nombre_usuario = ?, contrasena = ?, rol = ?, activo = ?
+            SET usuario = ?, contrasena = ?, rol = ?, activo = ?
             WHERE id = ?
         """, (nuevo_nombre, nueva_contrasena, nuevo_rol, nuevo_estado, self.usuario_id))
         conn.commit()
         conn.close()
         messagebox.showinfo("Éxito", "Cambios guardados con éxito.")
         self.destroy()
-

@@ -48,7 +48,8 @@ def crear_base_datos():
     cursor.execute("DROP TABLE IF EXISTS usuarios")
     cursor.execute("""
     CREATE TABLE usuarios (
-        usuario TEXT PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario TEXT,
         contrasena TEXT NOT NULL,
         rol TEXT NOT NULL,
         activo INTEGER DEFAULT 1
