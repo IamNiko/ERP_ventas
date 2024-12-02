@@ -95,7 +95,7 @@ class BuscadorVentas(ctk.CTkFrame):
             conn = sqlite3.connect("erp_ventas.db")
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT fecha, cliente, articulo_id, cantidad, total
+                SELECT fecha, cliente, id, cantidad, total
                 FROM ventas
                 WHERE fecha BETWEEN ? AND ?
             """, (fecha_inicio, fecha_fin))
@@ -113,37 +113,3 @@ class BuscadorVentas(ctk.CTkFrame):
         except Exception as e:
             messagebox.showerror("Error", f"Hubo un error al buscar las ventas: {e}")
 
-# Opcional: función de utilidad para cargar datos de prueba
-def cargar_ventas_desde_csv(ruta_csv):
-    """Carga datos de un archivo CSV e inserta en la tabla 'ventas'."""
-    conn = sqlite3.connect("erp_ventas.db")
-    cursor = conn.cursor()
-
-    ventas = pd.read_csv(ruta_csv)
-    ventas.rename(columns={
-        'n_comprobante': 'comprobante',
-        'fecha': 'fecha',
-        'cliente': 'cliente',
-        'codigo': 'articulo_id',
-        'cantidad': 'cantidad',
-        'p_unitario': 'precio_unitario',
-        'iva': 'iva',
-        'precio_final': 'total'
-    }, inplace=True)
-
-    for index, row in ventas.iterrows():
-        cursor.execute("""
-            INSERT INTO ventas (fecha, articulo_id, cantidad, precio_unitario, total, cliente)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            row['fecha'],
-            row['articulo_id'],
-            row['cantidad'],
-            row['precio_unitario'],
-            row['total'],
-            row['cliente']
-        ))
-
-    conn.commit()
-    conn.close()
-    print("Datos del CSV cargados correctamente.")

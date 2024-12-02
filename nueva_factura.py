@@ -48,12 +48,12 @@ class NuevaFactura(ctk.CTkFrame):
 
         # Tipo de Cliente
         ctk.CTkLabel(self.row2_frame, text="Tipo de Cliente:").pack(side="left", padx=5)
-        self.tipo_cliente = ctk.CTkComboBox(
+        self.cliente = ctk.CTkComboBox(
             self.row2_frame,
             values=["Consumidor Final", "Cuenta Corriente"],
             width=150
         )
-        self.tipo_cliente.pack(side="left", padx=20)
+        self.cliente.pack(side="left", padx=20)
 
         # Medio de Pago
         ctk.CTkLabel(self.row2_frame, text="Medio de Pago:").pack(side="left", padx=5)
@@ -68,13 +68,44 @@ class NuevaFactura(ctk.CTkFrame):
         self.tabla_frame = ctk.CTkFrame(self)
         self.tabla_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
+        # Frame para entrada de código (agregar justo después de self.tabla_frame)
+        self.codigo_frame = ctk.CTkFrame(self)
+        self.codigo_frame.pack(fill="x", padx=20, pady=(5,0))
+
+        # Estilo para la tabla con líneas
+        style = ttk.Style()
+        style.configure("Treeview", 
+                        background="white",
+                        foreground="black",
+                        fieldbackground="white",
+                        rowheight=25)
+        style.configure("Treeview.Heading",
+                        background="gray75",
+                        foreground="black",
+                        relief="raised")
+        
         # Tabla de items
         self.tabla = ttk.Treeview(
             self.tabla_frame,
             columns=("codigo", "descripcion", "cantidad", "precio", "iva", "total"),
             show="headings",
-            height=10
+            height=10,
+            style="Treeview"
         )
+
+        # Entry para código de barras
+        ctk.CTkLabel(self.codigo_frame, text="Código:").pack(side="left", padx=5)
+        self.codigo_entry = ctk.CTkEntry(self.codigo_frame, width=150)
+        self.codigo_entry.pack(side="left", padx=5)
+        self.codigo_entry.bind('<Return>', self.procesar_codigo)
+
+        # Botón para procesar código manualmente
+        self.procesar_btn = ctk.CTkButton(
+            self.codigo_frame, 
+            text="Agregar", 
+            command=lambda: self.procesar_codigo(None)
+        )
+        self.procesar_btn.pack(side="left", padx=5)
 
         # Configurar columnas
         self.tabla.heading("codigo", text="Código")
@@ -226,23 +257,24 @@ class NuevaFactura(ctk.CTkFrame):
                 cursor = conn.cursor()
                 
                 # Insertar encabezado de la venta
+                descripcion_venta = ", ".join([self.tabla.item(item)['values'][1] for item in self.tabla.get_children()])
                 cursor.execute("""
                     INSERT INTO ventas (
-                        fecha, hora, tipo_comprobante, tipo_cliente, 
-                        medio_pago, subtotal, impuestos, total
+                        fecha, hora, tipo_comprobante, cliente, 
+                        medio_pago, iva, total, descripcion
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     self.fecha_label.cget("text"),
                     self.hora_label.cget("text"),
                     self.tipo_comprobante.get(),
-                    self.tipo_cliente.get(),
+                    self.cliente.get(),
                     self.medio_pago.get(),
-                    float(self.subtotal_label.cget("text").replace('$', '')),
                     float(self.impuestos_label.cget("text").replace('$', '')),
-                    float(self.total_label.cget("text").replace('$', ''))
+                    float(self.total_label.cget("text").replace('$', '')),
+                    descripcion_venta
                 ))
-                
-                venta_id = cursor.lastrowid
+
+                venta_id = 9999
 
                 # Insertar items de la venta
                 for item in self.tabla.get_children():
@@ -296,7 +328,7 @@ class NuevaFactura(ctk.CTkFrame):
         
         # Resetear combos
         self.tipo_comprobante.set("Factura")
-        self.tipo_cliente.set("Consumidor Final")
+        self.cliente.set("Consumidor Final")
         self.medio_pago.set("Efectivo")
         
         # Focus en el entry de código

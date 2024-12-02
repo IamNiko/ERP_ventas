@@ -62,7 +62,7 @@ class LoginApp(ctk.CTk):
 
         # Verificar las credenciales en la base de datos
         cursor.execute('''
-            SELECT rol FROM usuarios WHERE nombre_usuario = ? AND contrasena = ? AND activo = 1
+            SELECT rol FROM usuarios WHERE usuario = ? AND contrasena = ? AND activo = 1
         ''', (username, password))
         user = cursor.fetchone()
         conn.close()
